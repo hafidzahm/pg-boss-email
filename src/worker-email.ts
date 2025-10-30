@@ -1,6 +1,9 @@
 import "dotenv/config";
 import { boss, startBoss } from "./boss";
 
+// simpan jumlah percobaan per job.id (sementara di memori)
+const attempts = new Map<string, number>();
+
 async function sendEmail(to: string, subject: string, body: string) {
   // MOCK pengiriman email — ganti nanti dengan SMTP/SendGrid
   console.log(
