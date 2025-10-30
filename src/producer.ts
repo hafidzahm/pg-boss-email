@@ -1,6 +1,6 @@
 import "dotenv/config";
 import z from "zod";
-import { boss, startBoss } from "./boss.ts";
+import { boss, startBoss } from "./boss";
 
 const emailPayload = z.object({
   to: z.string().email(),

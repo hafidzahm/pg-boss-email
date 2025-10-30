@@ -1,4 +1,4 @@
-import { startBoss, boss } from "./boss.ts";
+import { startBoss, boss } from "./boss";
 
 await startBoss();
 
