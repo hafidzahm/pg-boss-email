@@ -18,8 +18,8 @@ async function main() {
 
   const jobId = await boss.send("email.send", data, {
     retryLimit: 5, // maksimal 5 kali
-    retryBackoff: true, // jeda makin lama tiap gagal
-    retryDelay: 2000, // (opsional) starting delay = 2s
+    retryBackoff: true, // jeda makin lama tiap gagal, 2s -> 4s -> 8s ...
+    retryDelay: 2, // (opsional) starting delay = 2s
   });
   console.log("Enqueued job:", jobId);
   process.exit(0);

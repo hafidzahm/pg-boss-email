@@ -34,20 +34,24 @@ async function main() {
 
   // batch 1 saja biar gampang lihat alurnya
   await boss.work("email.send", async ([job]) => {
-    const { to, subject, body } = job?.data as {
+    if (!job || typeof job.id !== "string") {
+      console.error("[mailer] Invalid job or missing job.id");
+      return;
+    }
+    const { to, subject, body } = job.data as {
       to: string;
       subject: string;
       body: string;
     };
-    const n = (attempts.get(job?.id as string) ?? 0) + 1;
-    attempts.set(job?.id as string, n);
+    const n = (attempts.get(job.id) ?? 0) + 1;
+    attempts.set(job.id, n);
 
     if (n < 3) {
-      console.log(`[mailer] simulate fail #${n} for job ${job?.id}`);
+      console.log(`[mailer] simulate fail #${n} for job ${job.id}`);
       throw new Error("temporary SMTP error");
     }
 
-    console.log(`[mailer] success on attempt #${n} for job ${job?.id}`);
+    console.log(`[mailer] success on attempt #${n} for job ${job.id}`);
     await sendEmail(to, subject, body);
     // [mailer] simulate fail #1 for job ...
     // [mailer] simulate fail #2 for job ...
