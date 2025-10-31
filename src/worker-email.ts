@@ -16,49 +16,51 @@ async function sendEmail(to: string, subject: string, body: string) {
 
 async function main() {
   await startBoss();
+  // simulasi berhasil
   // Worker akan ambil job dari queue 'email.send'
   // Ambil 5 job per polling, lalu proses paralel
-  //   await boss.work("email.send", { batchSize: 5 }, async (jobs) => {
-  //     await Promise.all(
-  //       jobs.map(async (job) => {
-  //         const { to, subject, body } = job.data as {
-  //           to: string;
-  //           subject: string;
-  //           body: string;
-  //         };
-  //         await sendEmail(to, subject, body);
-  //         // resolve = completed; throw error = akan di-retry oleh pg-boss (sesuai opsi di producer)
-  //       })
-  //     );
-  //   });
-
-  // batch 1 saja biar gampang lihat alurnya
-  await boss.work("email.send", async ([job]) => {
-    if (!job || typeof job.id !== "string") {
-      console.error("[mailer] Invalid job or missing job.id");
-      return;
-    }
-    const { to, subject, body } = job.data as {
-      to: string;
-      subject: string;
-      body: string;
-    };
-    const n = (attempts.get(job.id) ?? 0) + 1;
-    attempts.set(job.id, n);
-
-    if (n < 3) {
-      console.log(`[mailer] simulate fail #${n} for job ${job.id}`);
-      throw new Error("temporary SMTP error");
-    }
-
-    console.log(`[mailer] success on attempt #${n} for job ${job.id}`);
-    await sendEmail(to, subject, body);
-    // [mailer] simulate fail #1 for job ...
-    // [mailer] simulate fail #2 for job ...
-    // (wait sebentar karena backoff)
-    // [mailer] success on attempt #3 for job ...
-    // [mailer] send -> to=...
+  await boss.work("email.send", { batchSize: 5 }, async (jobs) => {
+    await Promise.all(
+      jobs.map(async (job) => {
+        const { to, subject, body } = job.data as {
+          to: string;
+          subject: string;
+          body: string;
+        };
+        await sendEmail(to, subject, body);
+        // resolve = completed; throw error = akan di-retry oleh pg-boss (sesuai opsi di producer)
+      })
+    );
   });
+
+  // simulasi gagal
+  // batch 1 saja biar gampang lihat alurnya
+  // await boss.work("email.send", async ([job]) => {
+  //   if (!job || typeof job.id !== "string") {
+  //     console.error("[mailer] Invalid job or missing job.id");
+  //     return;
+  //   }
+  //   const { to, subject, body } = job.data as {
+  //     to: string;
+  //     subject: string;
+  //     body: string;
+  //   };
+  //   const n = (attempts.get(job.id) ?? 0) + 1;
+  //   attempts.set(job.id, n);
+
+  //   if (n < 3) {
+  //     console.log(`[mailer] simulate fail #${n} for job ${job.id}`);
+  //     throw new Error("temporary SMTP error");
+  //   }
+
+  //   console.log(`[mailer] success on attempt #${n} for job ${job.id}`);
+  //   await sendEmail(to, subject, body);
+  //   // [mailer] simulate fail #1 for job ...
+  //   // [mailer] simulate fail #2 for job ...
+  //   // (wait sebentar karena backoff)
+  //   // [mailer] success on attempt #3 for job ...
+  //   // [mailer] send -> to=...
+  // });
 }
 
 // jalankan
